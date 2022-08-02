@@ -1,0 +1,38 @@
+service: omni-starry-report-email
+
+provider:
+  name: aws
+  runtime: python3.7
+  versionFunctions: true
+  stage: ${opt:stage, 'dev'}  
+  region: us-east-1
+  timeout: 300
+  memorySize: 256
+  role: ${ssm:/omni-dw/${self:provider.stage}/lambda/role}
+  vpc:
+    securityGroupIds:
+      - ${ssm:/omni-dw/${self:provider.stage}/lambda/sgId}
+    subnetIds:
+      - ${ssm:/omni-dw/${self:provider.stage}/lambda/subnetA}
+  stackTags:
+    Application: report-email-starry
+    CreateBy: BizCloudExperts
+    Version: "1.0"
+    Environment: ${self:provider.stage}
+
+package:
+  individually: true
+  exclude:
+  - serverless.yaml
+
+functions:
+  report-data-conversion: ${file(config/functions/report_data_csv.yml):function}
+  report-data-xls: ${file(config/functions/report_data_xlsx.yml):function}
+  report-data-send-email: ${file(config/functions/report_data_email.yml):function}
+
+resources:
+  Resources:
+    S3BucketForCOPY:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: ${self:service}

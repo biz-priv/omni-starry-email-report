@@ -1,0 +1,29 @@
+function:
+  handler: src/starry_report_data_xlsx.handler
+  events:
+    - s3:
+       bucket: omni-report-email
+       event: s3:ObjectCreated:*
+       rules:
+        - prefix: csv-report-starry/
+        - suffix: .csv000
+       existing: true
+  name: ${self:service}-data-xls-${self:provider.stage}
+  description: omni email data report xls conversion  - ${self:provider.stage}
+  memorySize: 2048
+  timeout: 600
+  package:
+    include:
+    - psycopg2/**
+    - pandas/**
+    - numpy/**
+    - pytz/**
+    - /src/report_data_xlsx.py
+    exclude:
+    - config/**
+  
+
+  environment:
+    DBNAME: ${ssm:/omni-dw/${self:provider.stage}/db/name}
+    USER: ${ssm:/omni-dw/${self:provider.stage}/db/user~true}
+    CLUSTERID: ${ssm:/omni-dw/${self:provider.stage}/cluster/identifier}

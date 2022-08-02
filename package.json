@@ -1,0 +1,9 @@
+{
+  "name": "omni-report-email",
+  "description": "",
+  "version": "0.1.0",
+  "dependencies": {},
+  "devDependencies": {
+    "serverless-aws-alias": "^1.8.0"
+  }
+}

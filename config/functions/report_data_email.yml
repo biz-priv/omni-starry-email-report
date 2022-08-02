@@ -1,0 +1,38 @@
+function:
+  handler: src/starry_report_data_email.handler
+  name: ${self:service}-data-send-email-${self:provider.stage}
+  description: omni email starry data report lambda  - ${self:provider.stage}
+  memorySize: 2048
+  timeout: 600
+  package:
+    include:
+    - /src/starry_report_data_email.py   
+    exclude:
+    - config/**
+    - psycopg2/**
+    - pandas/**
+    - numpy/**
+    - pytz/**
+    - bin/**
+    - node_modules
+    - pydash/**
+    - six/**
+    - numpy-1.20.1.dist-info/**
+    - numpy.libs/**
+    - pandas-1.2.3.dist-info/**
+    - pytz-2021.1.dist-info/**
+    - six-1.15.0.dist-info/**
+    - six.py
+    - templates/**
+  events:
+    - s3:
+       bucket: omni-report-email
+       event: s3:ObjectCreated:*
+       rules:
+        - prefix: csv-report-starry/
+        - suffix: .xlsx
+       existing: true
+
+  environment:
+    PASS: ${ssm:/omni-dw/ses/external-reports/smtp/password}
+    USER: ${ssm:/omni-dw/ses/external-reports/smtp/user}
